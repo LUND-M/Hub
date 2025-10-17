@@ -162,7 +162,7 @@ local PlaceId = game.PlaceId
 local payload = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/LUND-M/Hub/refs/heads/main/.luau"))()'
 
 Tab:CreateButton({
-	Name = "Join small server",
+	Name = "Join Nearly small server",
 	Callback = function()
 		if queue_on_teleport then
 			queue_on_teleport(payload)
@@ -232,9 +232,9 @@ Tab:CreateButton({
 			fluxus.queue_on_teleport(payload)
 		elseif setclipboard then
 			setclipboard(payload)
-			warn("Payload copied to clipboard. queue_on_teleport not supported.")
+			warn("Error.")
 		else
-			warn("queue_on_teleport not supported.")
+			warn("Error.")
 		end
 
 		local success, servers = pcall(function()
@@ -244,7 +244,7 @@ Tab:CreateButton({
 		end)
 
 		if not success or not servers then
-			warn("Kunne ikke hente serverliste!")
+			warn("Error.")
 			return
 		end
 
