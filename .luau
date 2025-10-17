@@ -177,7 +177,6 @@ Tab:CreateButton({
 			warn("Error.")
 		end
 
-		-- Hent serverliste
 		local success, servers = pcall(function()
 			local url = "https://games.roblox.com/v1/games/"..PlaceId.."/servers/Public?sortOrder=Asc&limit=100"
 			local res = game:HttpGet(url)
@@ -212,3 +211,72 @@ Tab:CreateButton({
 		end
 	end
 })
+
+-- Join Full Server
+local HttpService = game:GetService("HttpService")
+local TP = game:GetService("TeleportService")
+local plr = game.Players.LocalPlayer
+local PlaceId = game.PlaceId
+
+local payload = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/LUND-M/Hub/refs/heads/main/.luau"))()'
+
+Tab:CreateButton({
+	Name = "Join Nearly Full Server",
+	Callback = function()
+
+		if queue_on_teleport then
+			queue_on_teleport(payload)
+		elseif syn and syn.queue_on_teleport then
+			syn.queue_on_teleport(payload)
+		elseif fluxus and fluxus.queue_on_teleport then
+			fluxus.queue_on_teleport(payload)
+		elseif setclipboard then
+			setclipboard(payload)
+			warn("Payload copied to clipboard. queue_on_teleport not supported.")
+		else
+			warn("queue_on_teleport not supported.")
+		end
+
+		local success, servers = pcall(function()
+			local url = "https://games.roblox.com/v1/games/"..PlaceId.."/servers/Public?sortOrder=Asc&limit=100"
+			local res = game:HttpGet(url)
+			return HttpService:JSONDecode(res).data
+		end)
+
+		if not success or not servers then
+			warn("Kunne ikke hente serverliste!")
+			return
+		end
+
+		local targetServer = nil
+		local fallbackServer = nil
+		local minPlayers = math.huge
+
+		for _, server in pairs(servers) do
+			if server.id ~= game.JobId and server.playing < server.maxPlayers then
+
+				if server.playing == server.maxPlayers - 1 then
+					targetServer = server.id
+					break
+				end
+
+				if server.playing < minPlayers then
+					minPlayers = server.playing
+					fallbackServer = server.id
+				end
+			end
+		end
+
+		if not targetServer then
+			targetServer = fallbackServer
+		end
+
+		if targetServer then
+			TP:TeleportToPlaceInstance(PlaceId, targetServer, plr)
+		else
+			warn("No server found.")
+		end
+	end
+})
+
+local Section = Tab:CreateSection("Info")
