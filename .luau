@@ -137,15 +137,14 @@ local Divider = Tab:CreateDivider()
 local UIS = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local player = game.Players.LocalPlayer
-local tpwalking, key, speed = false, nil, 1 -- Default speed is 1, keybind is nil
+local tpwalking, key, speed = false, nil, 1
 
--- TP Walk Speed input
 Tab:CreateInput({
-    Name = "TP Walk Speed",
+    Name = "Set TP Walk Speed",
     CurrentValue = "1",
     PlaceholderText = "1",
     RemoveTextAfterFocusLost = false,
-    Flag = "TPWalkSpeed",
+    Flag = "TPWalkSpeedInput",
     Callback = function(Text)
         local num = tonumber(Text)
         if num then
@@ -156,13 +155,12 @@ Tab:CreateInput({
     end,
 })
 
--- TP Walk Toggle
 local toggle = Tab:CreateToggle({
     Name = "TP Walk",
     CurrentValue = false,
     Flag = "ToggleTPWalk",
-    Callback = function(v)
-        tpwalking = v
+    Callback = function(Value)
+        tpwalking = Value
         if tpwalking then
             spawn(function()
                 local chr = player.Character
@@ -170,7 +168,8 @@ local toggle = Tab:CreateToggle({
                 while tpwalking and chr and hum and hum.Parent do
                     local delta = RunService.Heartbeat:Wait()
                     if hum.MoveDirection.Magnitude > 0 then
-                        chr:TranslateBy(hum.MoveDirection * (speed > 0 and speed or 1) * delta * 10)
+                        chr:TranslateBy(hum.MoveDirection * speed * delta * 10)
+                        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 16
                     end
                 end
             end)
@@ -178,7 +177,6 @@ local toggle = Tab:CreateToggle({
     end,
 })
 
--- TP Walk Keybind input (starts blank)
 Tab:CreateInput({
     Name = "Keybind",
     PlaceholderText = "Leave blank for no keybind",
@@ -190,7 +188,6 @@ Tab:CreateInput({
     end,
 })
 
--- Keybind toggling
 UIS.InputBegan:Connect(function(input, gameProcessed)
     if not gameProcessed and key and input.KeyCode == key then
         tpwalking = not tpwalking
@@ -198,8 +195,6 @@ UIS.InputBegan:Connect(function(input, gameProcessed)
     end
 end)
 
-
--------------
 
 local Tab = Window:CreateTab("Server", "server")
 local Section = Tab:CreateSection("Joining")
