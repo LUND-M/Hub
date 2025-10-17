@@ -130,6 +130,76 @@ UIS.JumpRequest:Connect(function()
 	end
 end)
 
+local Divider = Tab:CreateDivider()
+local Divider = Tab:CreateDivider()
+
+--TP Walk
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local player = game.Players.LocalPlayer
+local tpwalking, key, speed = false, nil, 1 -- Default speed is 1, keybind is nil
+
+-- TP Walk Speed input
+Tab:CreateInput({
+    Name = "TP Walk Speed",
+    CurrentValue = "1",
+    PlaceholderText = "1",
+    RemoveTextAfterFocusLost = false,
+    Flag = "TPWalkSpeed",
+    Callback = function(Text)
+        local num = tonumber(Text)
+        if num then
+            speed = num
+        else
+            warn("Invalid speed")
+        end
+    end,
+})
+
+-- TP Walk Toggle
+local toggle = Tab:CreateToggle({
+    Name = "TP Walk",
+    CurrentValue = false,
+    Flag = "ToggleTPWalk",
+    Callback = function(v)
+        tpwalking = v
+        if tpwalking then
+            spawn(function()
+                local chr = player.Character
+                local hum = chr and chr:FindFirstChildWhichIsA("Humanoid")
+                while tpwalking and chr and hum and hum.Parent do
+                    local delta = RunService.Heartbeat:Wait()
+                    if hum.MoveDirection.Magnitude > 0 then
+                        chr:TranslateBy(hum.MoveDirection * (speed > 0 and speed or 1) * delta * 10)
+                    end
+                end
+            end)
+        end
+    end,
+})
+
+-- TP Walk Keybind input (starts blank)
+Tab:CreateInput({
+    Name = "Keybind",
+    PlaceholderText = "Leave blank for no keybind",
+    Value = "",
+    RemoveTextAfterFocusLost = false,
+    Flag = "InputTPWalkKeybind",
+    Callback = function(t)
+        key = t ~= "" and Enum.KeyCode[t:upper()] or nil
+    end,
+})
+
+-- Keybind toggling
+UIS.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and key and input.KeyCode == key then
+        tpwalking = not tpwalking
+        toggle:Set(tpwalking)
+    end
+end)
+
+
+-------------
 
 local Tab = Window:CreateTab("Server", "server")
 local Section = Tab:CreateSection("Joining")
@@ -280,3 +350,4 @@ Tab:CreateButton({
 })
 
 local Section = Tab:CreateSection("Info")
+
