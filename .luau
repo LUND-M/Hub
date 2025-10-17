@@ -132,8 +132,9 @@ end)
 
 
 local Tab = Window:CreateTab("Server", "server")
-local Section = Tab:CreateSection("Info")
+local Section = Tab:CreateSection("Joining")
 
+-- Rejoin
 local TP = game:GetService("TeleportService")
 local plr = game.Players.LocalPlayer
 local payload = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/LUND-M/Hub/refs/heads/main/.luau"))()'
@@ -143,5 +144,71 @@ Tab:CreateButton({
 	Callback = function()
 		if queue_on_teleport then queue_on_teleport(payload) end
 		TP:TeleportToPlaceInstance(game.PlaceId, game.JobId, plr)
+	end
+})
+
+local TP = game:GetService("TeleportService")
+local plr = game.Players.LocalPlayer
+local PlaceId = game.PlaceId
+
+local Divider = Tab:CreateDivider()
+
+-- Join Small Server
+local HttpService = game:GetService("HttpService")
+local TP = game:GetService("TeleportService")
+local plr = game.Players.LocalPlayer
+local PlaceId = game.PlaceId
+
+local payload = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/LUND-M/Hub/refs/heads/main/.luau"))()'
+
+Tab:CreateButton({
+	Name = "Join small server",
+	Callback = function()
+		if queue_on_teleport then
+			queue_on_teleport(payload)
+		elseif syn and syn.queue_on_teleport then
+			syn.queue_on_teleport(payload)
+		elseif fluxus and fluxus.queue_on_teleport then
+			fluxus.queue_on_teleport(payload)
+		elseif setclipboard then
+			setclipboard(payload)
+			warn("Error.")
+		else
+			warn("Error.")
+		end
+
+		-- Hent serverliste
+		local success, servers = pcall(function()
+			local url = "https://games.roblox.com/v1/games/"..PlaceId.."/servers/Public?sortOrder=Asc&limit=100"
+			local res = game:HttpGet(url)
+			return HttpService:JSONDecode(res).data
+		end)
+
+		if not success or not servers then
+			warn("Error.")
+			return
+		end
+
+		local targetServer = nil
+		local minPlayers = math.huge
+
+		for _, server in pairs(servers) do
+			if server.id ~= game.JobId and server.playing < server.maxPlayers then
+				if server.playing == 0 then
+					targetServer = server.id
+					break
+				end
+				if server.playing < minPlayers then
+					minPlayers = server.playing
+					targetServer = server.id
+				end
+			end
+		end
+
+		if targetServer then
+			TP:TeleportToPlaceInstance(PlaceId, targetServer, plr)
+		else
+			warn("No server found.")
+		end
 	end
 })
