@@ -136,7 +136,7 @@ local Section = Tab:CreateSection("Info")
 
 local TP = game:GetService("TeleportService")
 local plr = game.Players.LocalPlayer
-local payload = 'loadstring(game:HttpGet("idk"))()'
+local payload = 'loadstring(game:HttpGet("https://raw.githubusercontent.com/LUND-M/Hub/refs/heads/main/.luau"))()'
 
 Tab:CreateButton({
 	Name = "Rejoin Server",
